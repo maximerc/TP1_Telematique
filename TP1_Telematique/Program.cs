@@ -41,8 +41,8 @@ namespace TP1_Telematique
 
 
             var reseau = new Reseau();
-            var recepteur = new Recepteur();            
-            var emetteur = new Emetteur();
+            var recepteur = new Recepteur();
+            var emetteur = new Emetteur(tailleTampon);
 
             var threadReseau = new Thread(new ThreadStart(reseau.Demarrer));
             var threadRecepteur = new Thread(new ThreadStart(recepteur.Recevoir));
