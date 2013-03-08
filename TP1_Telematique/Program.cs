@@ -39,14 +39,13 @@ namespace TP1_Telematique
                 destinationFichier = args[3];
             }
 
-
+            var station = new Station(tailleTampon);
             var reseau = new Reseau();
-            var recepteur = new Recepteur();
-            var emetteur = new Emetteur(tailleTampon);
+         
 
-            var threadReseau = new Thread(new ThreadStart(reseau.Demarrer));
-            var threadRecepteur = new Thread(new ThreadStart(recepteur.Recevoir));
-            var threadEmetteur = new Thread(new ThreadStart(emetteur.Emettre));
+            var threadReseau = new Thread(new ThreadStart(reseau.demarrer));
+            var threadRecepteur = new Thread(new ThreadStart(station.recevoir));
+            var threadEmetteur = new Thread(new ThreadStart(station.emettre));
 
             threadReseau.Start();
             threadRecepteur.Start();

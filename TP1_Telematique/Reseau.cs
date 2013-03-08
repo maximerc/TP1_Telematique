@@ -7,5 +7,8 @@ namespace TP1_Telematique
 {
     class Reseau
     {
+        public void demarrer()
+        {
+        }
     }
 }
