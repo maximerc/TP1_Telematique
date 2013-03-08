@@ -22,5 +22,4 @@ namespace TP1_Telematique
         {
         }
     }
-    }
 }
