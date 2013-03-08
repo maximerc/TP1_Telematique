@@ -7,6 +7,10 @@ namespace TP1_Telematique
 {
     class Trame
     {
+        int numeroTrame;
+        int codeDetecteur; //code detectuer ou correcteur
+
+
              //--------8//-------------6//-------------26//TypeOuLong//------0-1500//-----------0-46//----4
       //||preambule    adresse de       adr source              || données    || remplisage      total de controle
        //              destination 

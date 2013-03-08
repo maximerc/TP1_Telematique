@@ -13,7 +13,13 @@ namespace TP1_Telematique
             int N = 5;
 
             Trame trame = new Trame(N);
-            Trame tamponEnvoie = new Trame(N, tailleTampon);
+            //taille correspondante au premier paramètre entré dans le programme multiplié par « N » octets 
+            Trame[] tamponEnvoie = new Trame[tailleTampon];
+        }
+
+        public int emettre()
+        {
+            return 0;
         }
     }
 }
