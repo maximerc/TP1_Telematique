@@ -8,9 +8,13 @@ namespace TP1_Telematique
     class Station
     {
         Trame[] tamponEnvoie;
+        private readonly frmMain _main;
 
-        public Station(int tailleTampon)
+        public Station(frmMain main, int tailleTampon)
         {
+            //utiliser afin de faire afficher les données envoyés ou reçues
+            _main = main;
+            _main.imprimer("Initialisation des stations");
             //une trame réseau de « N » octets
             int N = 5;
 
@@ -21,6 +25,7 @@ namespace TP1_Telematique
 
         public void emettre()
         {
+            _main.imprimer("L'émettion est démarré");
             while (true)
             {
                 if (tamponEnvoie.Length > 0)
@@ -32,6 +37,7 @@ namespace TP1_Telematique
         }
         public void recevoir()
         {
+            _main.imprimer("La réception est démarré");
             while (true)
             {
                 if (tamponEnvoie.Length > 0)
