@@ -15,6 +15,7 @@ namespace TP1_Telematique
     {
         public frmMain()
         {
+           
             InitializeComponent();
         }
 
@@ -60,8 +61,8 @@ namespace TP1_Telematique
 
         private void Run(int tailleTampon, int horlogeDeGarde, string fichierACopier, string destinationFichier)
         {
-            var station = new Station(tailleTampon);
-            var reseau = new Reseau();
+            var station = new Station(this,tailleTampon);
+            var reseau = new Reseau(this);
 
 
             var threadReseau = new Thread(new ThreadStart(reseau.demarrer));
@@ -73,6 +74,16 @@ namespace TP1_Telematique
             threadEmetteur.Start();
 
             Thread.Sleep(1);
+        }
+
+        public void imprimer(string message)
+        {
+            if (InvokeRequired)
+            {
+                this.Invoke(new Action<string>(imprimer), new object[] { message });
+                return;
+            }
+            textBox.Text += "(" + DateTime.Now + ")   - " + message + Environment.NewLine;
         }
     }
 }
