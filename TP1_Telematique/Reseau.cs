@@ -33,11 +33,12 @@ namespace TP1_Telematique
             {
                 if(estPretEmettre == false && estRecuDestination == false)
                 {
-                    estPretEmettre = true;
-                    estRecuDestination = true;
+                    System.Threading.Thread.Sleep(100);
                     trmReceptionDestination = trmEnvoieSource;
                     trmEnvoieSource = null;
-                    System.Threading.Thread.Sleep(100);
+                    estPretEmettre = true;
+                    estRecuDestination = true;
+                //    System.Threading.Thread.Sleep(100);
                 }
                 if (estPretEmettreReponse == false && estRecuDestinationReponse == false)
                 {
@@ -45,7 +46,6 @@ namespace TP1_Telematique
                     estRecuDestinationReponse = true;
                     trmReceptionDestinationReponse = trmEnvoieSourceReponse;
                     trmEnvoieSourceReponse = null;
-                    System.Threading.Thread.Sleep(100);
                 }
             }
         }

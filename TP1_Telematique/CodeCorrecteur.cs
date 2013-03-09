@@ -8,17 +8,6 @@ namespace TP1_Telematique
 {
     class CodeCorrecteur
     {
-        public string ajouterCode(byte[] donnees)
-        {
-            string donneesBin = "";
-
-            foreach (byte octet in donnees)
-            {
-                donneesBin += Convert.ToString(octet, 2).PadLeft(8, '0');
-            }
-
-            string bitsCorrecteurs = "";
-
-        }
+       
     }
 }

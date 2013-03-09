@@ -21,11 +21,12 @@ namespace TP1_Telematique
 
         private void btnEmettre_Click(object sender, EventArgs e)
         {
-            int tailleTampon, horlogeDeGarde;
+            int tailleTampon, horlogeDeGarde=0;
             string fichierACopier = "";
             string destinationFichier = "";
 
             //Validation des paramètres
+            /*
                 if (!Int32.TryParse(txtTailleTampon.Text, out tailleTampon))
                 {
                     MessageBox.Show("La taille du tampon doit être un entier");
@@ -42,6 +43,8 @@ namespace TP1_Telematique
                     fichierACopier = txtFichierSource.Text;
                     return;
                 }
+             * */
+            tailleTampon = 5;
  
 //                else if(!Directory.Exists(txtFichierDestination.Text))
 //                {
@@ -61,8 +64,8 @@ namespace TP1_Telematique
 
         private void Run(int tailleTampon, int horlogeDeGarde, string fichierACopier, string destinationFichier)
         {
-            var station = new Station(this,tailleTampon);
             var reseau = new Reseau(this);
+            var station = new Station(this,tailleTampon, reseau);
 
 
             var threadReseau = new Thread(new ThreadStart(reseau.demarrer));

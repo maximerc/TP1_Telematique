@@ -7,19 +7,25 @@ namespace TP1_Telematique
 {
     class Trame
     {
-        int numeroTrame;
-        int codeDetecteur; //code detectuer ou correcteur
+        public int numeroTrame;
+        //    int codeDetecteur;  //code detectuer ou correcteur
+        public int addrDestination;
+        public int addrSource;
+        public byte[] donnees;
+
+        public int preambule;//wtf
+        public int remplissage;//?
+        public int total_de_controle;//?
 
 
-       //--------8//-------------6//-------------26//TypeOuLong//------0-1500//-----------0-46//----4
-      //||preambule    adresse de       adr source              || données    || remplisage      total de controle
-       //              destination 
+
+
+        //--------8//-------------6//-------------26//TypeOuLong//------0-1500//-----------0-46//----4
+        //||preambule    adresse de       adr source              || données    || remplisage      total de controle
+        //              destination 
         public Trame(int taille)
         {
-        }
-
-        public Trame(int taille, int tailleTableau)
-        {
+            donnees = new byte[taille];
         }
     }
 }
