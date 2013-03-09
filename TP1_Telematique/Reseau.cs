@@ -7,24 +7,27 @@ namespace TP1_Telematique
 {
     class Reseau
     {
-        bool estPretEmettre { get; private set; }
-        bool estRecuDestination { get; private set; }
+        private readonly frmMain _main;
+
+        public bool estPretEmettre { get; private set; }
+        public bool estRecuDestination { get; private set; }
         Trame trmEnvoieSource;
         Trame trmReceptionDestination;
 
-        void Reseau()
+        public bool estPretEmettreReponse { get; private set; }
+        public bool estRecuDestinationReponse { get; private set; }
+        Trame trmEnvoieSourceReponse;
+        Trame trmReceptionDestinationReponse;
+
+        public Reseau(frmMain frm)
         {
-            int N = Properties.Settings.Default.TAILLE_FENETRE;
-
-            trmEnvoieSource = new Trame(N);
-            trmReceptionDestination = new Trame(N);
+            _main = frm;
         }
-
 
         public void demarrer()
         {
-            estPretEmettre = true;
-            estRecuDestination = false;
+            estPretEmettreReponse = estPretEmettre = true;
+            estRecuDestinationReponse = estRecuDestination = false;
             while (true)
             {
                 if(estPretEmettre == false && estRecuDestination == false)
@@ -33,6 +36,13 @@ namespace TP1_Telematique
                     estRecuDestination = true;
                     trmReceptionDestination = trmEnvoieSource;
                     trmEnvoieSource = null;
+                }
+                if (estPretEmettreReponse == false && estRecuDestinationReponse == false)
+                {
+                    estPretEmettreReponse = true;
+                    estRecuDestinationReponse = true;
+                    trmReceptionDestinationReponse = trmEnvoieSourceReponse;
+                    trmEnvoieSourceReponse = null;
                 }
             }
         }
@@ -48,6 +58,19 @@ namespace TP1_Telematique
         {
             estPretEmettre = false;
             return trmReceptionDestination;
+        }
+
+        //Reception d'une réponse
+        public void recevoirReponse(Trame trm)
+        {
+            trmEnvoieSourceReponse = trm;
+            estPretEmettreReponse = false;
+        }
+
+        public Trame donnerReponse()
+        {
+            estPretEmettreReponse = false;
+            return trmReceptionDestinationReponse;
         }
     }
 }
