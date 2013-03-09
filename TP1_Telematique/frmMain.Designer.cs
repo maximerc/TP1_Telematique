@@ -39,6 +39,7 @@
             this.label4 = new System.Windows.Forms.Label();
             this.txtFichierDestination = new System.Windows.Forms.TextBox();
             this.btnConfiguration = new System.Windows.Forms.Button();
+            this.textBox = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // btnEmettre
@@ -129,11 +130,22 @@
             this.btnConfiguration.UseVisualStyleBackColor = true;
             this.btnConfiguration.Click += new System.EventHandler(this.btnConfiguration_Click);
             // 
+            // textBox
+            // 
+            this.textBox.Location = new System.Drawing.Point(47, 248);
+            this.textBox.Multiline = true;
+            this.textBox.Name = "textBox";
+            this.textBox.ReadOnly = true;
+            this.textBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox.Size = new System.Drawing.Size(717, 204);
+            this.textBox.TabIndex = 10;
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(813, 464);
+            this.Controls.Add(this.textBox);
             this.Controls.Add(this.btnConfiguration);
             this.Controls.Add(this.txtFichierDestination);
             this.Controls.Add(this.label4);
@@ -144,6 +156,7 @@
             this.Controls.Add(this.txtTailleTampon);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.btnEmettre);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "frmMain";
             this.Text = "frmMain";
             this.ResumeLayout(false);
@@ -164,5 +177,6 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox txtFichierDestination;
         private System.Windows.Forms.Button btnConfiguration;
+        private System.Windows.Forms.TextBox textBox;
     }
 }

@@ -126,7 +126,7 @@
             this.chkErreurs.AutoSize = true;
             this.chkErreurs.Location = new System.Drawing.Point(199, 133);
             this.chkErreurs.Name = "chkErreurs";
-            this.chkErreurs.Size = new System.Drawing.Size(14, 13);
+            this.chkErreurs.Size = new System.Drawing.Size(15, 14);
             this.chkErreurs.TabIndex = 10;
             this.chkErreurs.UseVisualStyleBackColor = true;
             // 
