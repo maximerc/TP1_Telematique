@@ -33,7 +33,7 @@ namespace TP1_Telematique
             {
                 if(estPretEmettre == false && estRecuDestination == false)
                 {
-                    System.Threading.Thread.Sleep(100);
+                //    System.Threading.Thread.Sleep(100);
                     trmReceptionDestination = trmEnvoieSource;
                     trmEnvoieSource = null;
                     estPretEmettre = true;
@@ -61,7 +61,7 @@ namespace TP1_Telematique
         public Trame donner()
         {
             _main.imprimer("Le réseau done une trame de données");
-            estPretEmettre = false;
+            estRecuDestination = false;
             return trmReceptionDestination;
         }
 

@@ -32,6 +32,11 @@ namespace TP1_Telematique
                     MessageBox.Show("La taille du tampon doit être un entier");
                     return;
                 }
+                else if (tailleTampon < 1)
+                {
+                    MessageBox.Show("La taille du tampon doit être un entier positif");
+                    return;
+                }
                 else if (!Int32.TryParse(txtDelaiTemporisation.Text, out horlogeDeGarde))
                 {
                     MessageBox.Show("Le délai de temporisation doit être un entier");
@@ -65,12 +70,13 @@ namespace TP1_Telematique
         private void Run(int tailleTampon, int horlogeDeGarde, string fichierACopier, string destinationFichier)
         {
             var reseau = new Reseau(this);
-            var station = new Station(this,tailleTampon, reseau);
+            var stationRecepteur = new Station(this, tailleTampon, reseau);
+            var stationdEmetteur = new Station(this, tailleTampon, reseau);
 
 
             var threadReseau = new Thread(new ThreadStart(reseau.demarrer));
-            var threadRecepteur = new Thread(new ThreadStart(station.recevoir));
-            var threadEmetteur = new Thread(new ThreadStart(station.emettre));
+            var threadRecepteur = new Thread(new ThreadStart(stationRecepteur.recevoir));
+            var threadEmetteur = new Thread(new ThreadStart(stationdEmetteur.emettre));
 
             threadReseau.Start();
             threadRecepteur.Start();
@@ -87,6 +93,8 @@ namespace TP1_Telematique
                 return;
             }
             textBox.Text += "(" + DateTime.Now + ")   - " + message + Environment.NewLine;
+            textBox.SelectionStart = textBox.Text.Length + 1;
+            textBox.ScrollToCaret();
         }
     }
 }

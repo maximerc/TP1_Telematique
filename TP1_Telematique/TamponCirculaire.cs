@@ -30,8 +30,7 @@ namespace TP1_Telematique
         public Trame Consommer()
         {
             Trame trame = tampon[tete];
-            
-            
+            tete = (tete + 1) % tampon.Length;
             longueur--;
             return trame;
         }
@@ -45,6 +44,35 @@ namespace TP1_Telematique
         {
             return (longueur == tampon.Length);
         }
+
+        public int FenetreDisponible()
+        {
+            return tampon.Length - longueur;
+        }
+        
+        public int Length()
+        {
+            return tampon.Length;
+        }
+
+        public int TrouverTramePositionSelonNumero(int numeroTrame)
+        {
+            for (int i = tete; i < queue; i++)
+                if (tampon[i].numeroTrame == numeroTrame)
+                    return i;
+            return -1;
+        }
+
+        public Trame TrouverTrame(int positionTrame)
+        {
+            return (positionTrame != -1) ? tampon[positionTrame] : null;
+        }
+
+        public void Affecter(int numeroTrame, Trame trame)
+        {
+            tampon[TrouverTramePositionSelonNumero(numeroTrame)] = trame;
+        }
+
     }
 }
 

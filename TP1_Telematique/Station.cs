@@ -10,8 +10,9 @@ namespace TP1_Telematique
     {
         private readonly frmMain _main;
         TamponCirculaire tampon;
-        private int N = Properties.Settings.Default.TAILLE_FENETRE; //une trame réseau de « N » octets
+        private int tailleFenetre = Properties.Settings.Default.TAILLE_FENETRE; //une trame réseau de « N » octets
         private Reseau reseau;
+
 
         public Station(frmMain main, int tailleTampon, Reseau _reseau)
         {
@@ -27,29 +28,85 @@ namespace TP1_Telematique
 
         public void emettre()
         {
+            int prochaineTrame=0;
+            int dernierACK=0;
+            Trame trameManquante;
+
+
             _main.imprimer("L'émettion est démarré");
             string fichierSource = @"C:\Users\keven\Documents\ift585\test.txt";
             FileStream fs = new FileStream(fichierSource, FileMode.Open, FileAccess.Read);
 
-            int longueur = (int)fs.Length;
-            int position = 0;
             bool lectureFichierTermine = false;
 
             while (true)
             {
-                if (reseau.estPretEmettre && tampon.EstVide() == false) //si le reseau est prêt
+                if (reseau.estRecuDestinationReponse) //si le reseau est prêt
                 {
-                    reseau.recevoir(tampon.Consommer());
-                    //reponse du réseau, on s'est fait owné en terro
-                    
+                    Trame reponse = reseau.donnerReponse();
+                    trameManquante = tampon.TrouverTrame(dernierACK + 1);
+
+                    if ( trameManquante.EstExpire() ) /*timout*/
+                    {
+                        reseau.recevoir(trameManquante);
+                        trameManquante.DemarrerHorlogeDeGarde();
+                    }
+                    else if (reponse.EstNAK())
+                    {
+                        trameManquante = tampon.TrouverTrame(reponse.numeroTrame);
+                        reseau.recevoir(trameManquante);
+                        trameManquante.DemarrerHorlogeDeGarde();
+                    }
+                    else if (reponse.EstACK())
+                    {
+                        tampon.Affecter(reponse.numeroTrame, reponse);
+                       
+                        if (reponse.numeroTrame == dernierACK + 1)
+                        {
+                            dernierACK = reponse.numeroTrame;
+                            int positionDernierACK = tampon.TrouverTramePositionSelonNumero(dernierACK);
+                            Trame trameDernierACK = tampon.TrouverTrame(positionDernierACK);
+
+                            while (trameDernierACK.EstACK())
+                            {
+                                tampon.Consommer();
+                                dernierACK++;
+                                positionDernierACK = tampon.TrouverTramePositionSelonNumero(dernierACK);
+                                trameDernierACK = tampon.TrouverTrame(positionDernierACK);
+                            }
+
+                        }
+
+                        //reponse du réseau, on s'est fait owné en terro
+                        /*
+                            * In the absence of a communication error, the transmitter soon receives 
+                            * an acknowledgment for all the packets it has sent, leaving na equal to nt. 
+                            * If this does not happen after a reasonable delay, 
+                            * the transmitter must retransmit the packets between na and nt.
+                            */
+                    }
+
+                }
+                else if (reseau.estPretEmettre && tampon.EstVide() == false) //si le reseau est prêt
+                {
+                    int fenetreDisponible = tampon.Length();
+
+                    //envoi les trames entre dernierACK && dernierACK + fenetreDisponible
+                    //for ( int i=dernierACK+1; i < dernierACK + fenetreDisponible; i++)
+
+
+
+                    //Trame trameAEnvoyer = tampon.
+                    //    reseau.recevoir(tampon.TrouverTrame();
                 }
                 else if (lectureFichierTermine == false && tampon.EstPlein() == false)
                 {
-                    Trame trame = new Trame(N);
-                    fs.Read(trame.donnees, position, N);
-                    position += N;
+                    Trame trame = new Trame();
+
+                    fs.Position += fs.Read(trame.donnees, 0, N);
+
                     tampon.Ajouter(trame);
-                    if (position >= longueur)
+                    if (fs.Position >= fs.Length)
                     {
                         lectureFichierTermine = true;
                         fs.Close();
@@ -70,11 +127,42 @@ namespace TP1_Telematique
             string fichierDestination = @"C:\Users\keven\Documents\ift585\destination_miaw.txt";
             FileStream fs = new FileStream(fichierDestination, FileMode.Create, FileAccess.Write);
 
+
+            int trameNonRecue=0;
+            int highest_sequence_number_not_yet_received=0;
+            /*
+             * is one more than the sequence number of the highest sequence number received. 
+             * For simple receivers that only accept packets in order (wr = 1), this is the same as nr, 
+             * but can be greater if wr > 1. Note the distinction: all packets below nr have been received, 
+             * no packets above ns have been received, and between nr and ns, some packets have been received.
+             */
+
+
             while (true)
             {
-                if (reseau.estRecuDestination && tampon.EstPlein() == false) //si le reseau est prêt
+                if (reseau.estPretEmettreReponse) //si le reseau est prêt
                 {
-                    tampon.Ajouter( reseau.donner() );
+                    Trame trame = new Trame(420);
+                    reseau.recevoirReponse(trame);
+                    //reponse du réseau, on s'est fait owné en terro
+
+                }
+                else if (reseau.estRecuDestination && tampon.EstPlein() == false) //si le reseau est prêt
+                {
+                    Trame trame = reseau.donner();
+                    int fenetreMin = trameNonRecue;
+                    int fenetreMax = highest_sequence_number_not_yet_received + tampon.FenetreDisponible();
+
+                    //receiver checks to see if it falls in the receive window
+                    if (trame.numeroTrame >= fenetreMin && trame.numeroTrame < fenetreMax)
+                    {
+                        if (trameNonRecue == trame.numeroTrame)
+                        {
+                            trameNonRecue = trame.numeroTrame;
+                        }
+                    }
+
+                    tampon.Ajouter(trame);
                     //reponse du réseau, on s'est fait owné en terro
 
                 }
