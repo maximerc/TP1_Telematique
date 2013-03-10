@@ -10,13 +10,7 @@ namespace TP1_Telematique
     {
         public byte[] ajouterCode(byte[] donnees)
         {
-            string donneesBin = "";
-
-            // Conversion de byte[] (Ex: {0,254} en string binaire (Ex: "0000000011111110")
-            foreach (byte octet in donnees)
-            {
-                donneesBin += Convert.ToString(octet, 2).PadLeft(8, '0');
-            }
+            string donneesBin = byteArrayToString(donnees);
 
             int nbParite = (int)Math.Ceiling(Math.Log(donneesBin.Length, 2) + 1); // nb de bits de parites
             // Tableau contenant les bits de donnes et de parité
@@ -34,8 +28,7 @@ namespace TP1_Telematique
                 }
             }
 
-            // On génère les bits de parité
-            bool[] parite = new bool[nbParite];
+            // On génère les bits de parité et on les places dans donneesCode
             int valeurBitTraite = 1;
 
             for (int i = 0; i < nbParite; i++)
@@ -66,16 +59,7 @@ namespace TP1_Telematique
 
                 donneesCode[valeurBitTraite - 1] = sommeBit % 2 == 1;
             }
-            /*
-            donneesCode[0] = parite[0];
-            int compteurSurParite = 1;
 
-            for (int i = 1; i < donneesCode.Length; i *= 2)
-            {
-                donneesCode[i] = parite[compteurSurParite];
-                compteurSurParite++;
-            }
-            */
             // Conversion du tableau de bool en string
             string strCode = "";
 
@@ -85,6 +69,110 @@ namespace TP1_Telematique
             }
 
             return stringToByteArray(strCode);
+        }
+
+        public bool detecterCode(ref byte[] donnees)
+        {
+            StringBuilder donneesBin = new StringBuilder(byteArrayToString(donnees));
+            int nbParite = 0; // nb de bits de parites
+
+            // initialisation de nbParite et on coupe les zéros de trops dans donneesBin
+            for (int i = 1; ; i ++)
+            {
+                int nbPariteTemp = (int)Math.Ceiling(Math.Log(i * 8, 2) + 1);
+
+                if (i * 8 + nbPariteTemp > donneesBin.Length - 8)
+                {
+                    nbParite = nbPariteTemp;
+                    donneesBin.Remove(i * 8 + nbPariteTemp, donneesBin.Length - (i * 8 + nbPariteTemp));
+                    break;
+                }
+            }
+
+            bool[] xor = new bool[nbParite];
+
+            // On génère les bits de parité et on les places dans donneesCode
+            int valeurBitTraite = 1;
+
+            for (int i = 0; i < nbParite; i++)
+            {
+                int sommeBit = 0;
+                valeurBitTraite = (int)Math.Pow(2, i);
+                int j = valeurBitTraite + 1;
+
+                if (valeurBitTraite == 1)
+                {
+                    j++;
+                }
+
+                while (j <= donneesBin.Length)
+                {
+                    if (donneesBin[j - 1] == '1')
+                    {
+                        sommeBit++;
+                    }
+
+                    j++;
+
+                    if (j % valeurBitTraite == 0)
+                    {
+                        j = j + valeurBitTraite;
+                    }
+                }
+
+                if (Int32.Parse(donneesBin[valeurBitTraite - 1].ToString()) != sommeBit % 2)
+                {
+                    // Si code correcteur
+                    if (Properties.Settings.Default.TYPE_CODE.ToString() == Properties.Resources.CODE_CORRECTEUR)
+                    {
+                        xor[i] = true;
+                    }
+                    // Si code détecteur
+                    else
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            // Si code correcteur
+            if (Properties.Settings.Default.TYPE_CODE.ToString() == Properties.Resources.CODE_CORRECTEUR)
+            {
+                int sommeXor = 0;
+                
+                // Trouver sur quel bit l'erreur est
+                for (int i = 0; i < xor.Length; i++)
+                {
+                    if (xor[i] == true)
+                    {
+                        sommeXor += (int) Math.Pow(2, i);
+                    }
+                }
+
+                // Correction de l'erreur s'il y a lieu
+                if (sommeXor != 0)
+                {
+                    donneesBin[sommeXor - 1] = (donneesBin[sommeXor - 1] == '0') ? '1' : '0';
+                }
+            }
+
+            StringBuilder donneesBinSansParite = new StringBuilder();
+            int compteur = 0;
+
+            // On enleve les bits de parites de la chaine
+            for (int i = 1; i <= donneesBin.Length; i++)
+            {
+                // Si cette position est une position de bit de donnée
+                if (Math.Log(i, 2) % 1 != 0)
+                {
+                    donneesBinSansParite.Append(donneesBin[i-1]);
+                    compteur++;
+                }
+            }
+
+            donnees = stringToByteArray(donneesBinSansParite.ToString());
+
+            return false;
         }
 
         // Conversion de byte[] (Ex: {0,254} en string binaire (Ex: "0000000011111110")
