@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeCorrecteur.cs" />
+    <Compile Include="Constantes.cs" />
     <Compile Include="frmConfiguration.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -75,6 +76,7 @@
     </Compile>
     <Compile Include="Reseau.cs" />
     <Compile Include="Station.cs" />
+    <Compile Include="TamponCirculaire.cs" />
     <Compile Include="Trame.cs" />
   </ItemGroup>
   <ItemGroup>
