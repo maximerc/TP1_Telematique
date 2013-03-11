@@ -71,6 +71,7 @@
             this.txtTailleTampon.Name = "txtTailleTampon";
             this.txtTailleTampon.Size = new System.Drawing.Size(100, 20);
             this.txtTailleTampon.TabIndex = 2;
+            this.txtTailleTampon.Text = "100";
             // 
             // txtDelaiTemporisation
             // 
@@ -78,6 +79,7 @@
             this.txtDelaiTemporisation.Name = "txtDelaiTemporisation";
             this.txtDelaiTemporisation.Size = new System.Drawing.Size(100, 20);
             this.txtDelaiTemporisation.TabIndex = 3;
+            this.txtDelaiTemporisation.Text = "10";
             // 
             // label2
             // 
