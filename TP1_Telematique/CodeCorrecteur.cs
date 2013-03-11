@@ -91,7 +91,7 @@ namespace TP1_Telematique
 
             bool[] xor = new bool[nbParite];
 
-            // On génère les bits de parité et on les places dans donneesCode
+            // On génère les bits de parité et on les compare avec ceux de donneesBin
             int valeurBitTraite = 1;
 
             for (int i = 0; i < nbParite; i++)
