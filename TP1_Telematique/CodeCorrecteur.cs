@@ -6,11 +6,20 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 namespace TP1_Telematique
 {
+    /**
+     * Classe permettant d'appliquer un code correcteur (Code de Hamming) et 
+     * de détecté/corriger des erreurs à l'aide de celui-ci
+     * 
+     */
     class CodeCorrecteur
     {
+        /**
+         * Prend le tableau d'octets en entré et retourne un tableau contenant ces données et
+         * les bits de parités du code de Hamming
+         */
         public byte[] ajouterCode(byte[] donnees)
         {
-            string donneesBin = byteArrayToString(donnees);
+            string donneesBin = byteArrayToString(donnees);        // Données format string binaires
 
             int nbParite = (int)Math.Ceiling(Math.Log(donneesBin.Length, 2) + 1); // nb de bits de parites
             // Tableau contenant les bits de donnes et de parité
@@ -71,6 +80,7 @@ namespace TP1_Telematique
             return stringToByteArray(strCode);
         }
 
+        //Detecte et/ou corrige les erreurs dans le tableau de bytes passé en paramètres
         public bool detecterCode(ref byte[] donnees)
         {
             StringBuilder donneesBin = new StringBuilder(byteArrayToString(donnees));
