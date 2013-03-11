@@ -14,7 +14,7 @@ namespace TP1_Telematique
 
         public TamponCirculaire(int l)
         {
-            tampon = new Trame[l];
+            tampon = new Trame[l+1];
             tete = 0;
             queue = 0;
             longueur = 0;
@@ -61,6 +61,11 @@ namespace TP1_Telematique
                 if (tampon[i].numeroTrame == numeroTrame)
                     return i;
             return -1;
+        }
+
+        public Trame TrouverTrameSelonNumero(int numeroTrame)
+        {
+            return TrouverTrame(TrouverTramePositionSelonNumero(numeroTrame));
         }
 
         public Trame TrouverTrame(int positionTrame)

@@ -12,6 +12,7 @@ namespace TP1_Telematique
         TamponCirculaire tampon;
         private int tailleFenetre = Properties.Settings.Default.TAILLE_FENETRE; //une trame réseau de « N » octets
         private Reseau reseau;
+        CodeCorrecteur codeCorrecteur;
 
 
         public Station(frmMain main, int tailleTampon, Reseau _reseau)
@@ -24,12 +25,14 @@ namespace TP1_Telematique
             tailleTampon = 100;
             //taille correspondante au premier paramètre entré dans le programme multiplié par « N » octets 
             tampon = new TamponCirculaire(tailleTampon);
+            codeCorrecteur = new CodeCorrecteur();
         }
 
         public void emettre()
         {
-            int prochaineTrame=0;
-            int dernierACK=0;
+            int dernierACK = 0;
+            int prochaineTrameNumero = 0;
+            Trame prochaineTrame;
             Trame trameManquante;
 
 
@@ -41,17 +44,17 @@ namespace TP1_Telematique
 
             while (true)
             {
-                if (reseau.estRecuDestinationReponse) //si le reseau est prêt
+                trameManquante = tampon.TrouverTrame(dernierACK + 1);
+                if ( trameManquante != null && trameManquante.EstExpire()) /*timout*/
+                {
+                    reseau.recevoir(trameManquante);
+                    trameManquante.DemarrerHorlogeDeGarde();
+                }
+                else if (reseau.estRecuDestinationReponse) //si le reseau est prêt
                 {
                     Trame reponse = reseau.donnerReponse();
-                    trameManquante = tampon.TrouverTrame(dernierACK + 1);
 
-                    if ( trameManquante.EstExpire() ) /*timout*/
-                    {
-                        reseau.recevoir(trameManquante);
-                        trameManquante.DemarrerHorlogeDeGarde();
-                    }
-                    else if (reponse.EstNAK())
+                    if (reponse.EstNAK())
                     {
                         trameManquante = tampon.TrouverTrame(reponse.numeroTrame);
                         reseau.recevoir(trameManquante);
@@ -89,12 +92,20 @@ namespace TP1_Telematique
                 }
                 else if (reseau.estPretEmettre && tampon.EstVide() == false) //si le reseau est prêt
                 {
-                    int fenetreDisponible = tampon.Length();
-
                     //envoi les trames entre dernierACK && dernierACK + fenetreDisponible
                     //for ( int i=dernierACK+1; i < dernierACK + fenetreDisponible; i++)
 
-
+                    while (prochaineTrameNumero <= dernierACK + tailleFenetre)
+                    {
+                        prochaineTrame = tampon.TrouverTrame(prochaineTrameNumero);
+                        if (prochaineTrame != null)
+                        {
+                            reseau.recevoir(prochaineTrame);
+                            prochaineTrameNumero++;
+                        }
+                        else
+                            break;
+                    }
 
                     //Trame trameAEnvoyer = tampon.
                     //    reseau.recevoir(tampon.TrouverTrame();
@@ -103,7 +114,9 @@ namespace TP1_Telematique
                 {
                     Trame trame = new Trame();
 
-                    fs.Position += fs.Read(trame.donnees, 0, N);
+                    fs.Position += fs.Read(trame.donnees, 0, Constantes.TAILLE_DONNEE_TRAME);
+
+                    trame.donnees = codeCorrecteur.ajouterCode(trame.donnees);
 
                     tampon.Ajouter(trame);
                     if (fs.Position >= fs.Length)
@@ -129,7 +142,13 @@ namespace TP1_Telematique
 
 
             int trameNonRecue=0;
+            int teteFenetre=0;
             int highest_sequence_number_not_yet_received=0;
+
+
+            int fenetreTete = 0;
+            int fenetreQueue = tailleFenetre;
+
             /*
              * is one more than the sequence number of the highest sequence number received. 
              * For simple receivers that only accept packets in order (wr = 1), this is the same as nr, 
@@ -140,36 +159,67 @@ namespace TP1_Telematique
 
             while (true)
             {
-                if (reseau.estPretEmettreReponse) //si le reseau est prêt
-                {
-                    Trame trame = new Trame(420);
-                    reseau.recevoirReponse(trame);
-                    //reponse du réseau, on s'est fait owné en terro
-
-                }
-                else if (reseau.estRecuDestination && tampon.EstPlein() == false) //si le reseau est prêt
+                if (reseau.estRecuDestination && tampon.EstPlein() == false) //si le reseau est prêt
                 {
                     Trame trame = reseau.donner();
-                    int fenetreMin = trameNonRecue;
-                    int fenetreMax = highest_sequence_number_not_yet_received + tampon.FenetreDisponible();
+
+                    fenetreQueue = fenetreTete + tailleFenetre;
 
                     //receiver checks to see if it falls in the receive window
-                    if (trame.numeroTrame >= fenetreMin && trame.numeroTrame < fenetreMax)
+                    if ( trame.numeroTrame >= fenetreTete && trame.numeroTrame < fenetreQueue )
                     {
-                        if (trameNonRecue == trame.numeroTrame)
+
+                        if (fenetreTete == trame.numeroTrame)
                         {
-                            trameNonRecue = trame.numeroTrame;
+                            if (codeCorrecteur.detecterCode(ref trame.donnees)) //if NAK
+                            {
+                                Trame trameNak = new Trame(trame.numeroTrame, Constantes.TYPE_NAK);
+                                reseau.recevoirReponse(trameNak);
+                            }
+                            else // if ACK
+                            {
+                                Trame trameAck = new Trame(trame.numeroTrame, Constantes.TYPE_ACK);
+                                reseau.recevoirReponse(trameAck);
+
+                                for (int i = 0; i < Constantes.TAILLE_DONNEE_TRAME; i++)
+                                {
+                                    if (trame.donnees[i] == 0)
+                                    {
+                                        fs.Close();
+                                        _main.imprimer("La station réceptrice à terminé la réception et l'écriture du fichier.");
+                                        return;
+                                    }
+                                    fs.WriteByte(trame.donnees[i]);
+                                }
+                                fenetreTete++;
+
+
+                                while ( tampon.TrouverTramePositionSelonNumero(fenetreTete) > -1 )
+                                {
+                                    Trame trameAEcrire = tampon.TrouverTrameSelonNumero(fenetreTete);
+                                    for (int i = 0; i < Constantes.TAILLE_DONNEE_TRAME; i++)
+                                    {
+                                        if (trameAEcrire.donnees[i] == 0)
+                                        {
+                                            fs.Close();
+                                            _main.imprimer("La station réceptrice à terminé la réception et l'écriture du fichier.");
+                                            return;
+                                        }
+                                        fs.WriteByte(trameAEcrire.donnees[i]);
+                                    }
+                                    fenetreTete++;
+                                }
+                            }
                         }
                     }
 
-                    tampon.Ajouter(trame);
                     //reponse du réseau, on s'est fait owné en terro
 
                 }
                 else if (tampon.EstVide() == false)
                 {
                     Trame trame = tampon.Consommer();
-                    for (int i = 0; i < N; i++)
+                    for (int i = 0; i < Constantes.TAILLE_DONNEE_TRAME; i++)
                     {
                         if (trame.donnees[i] == 0)
                         {

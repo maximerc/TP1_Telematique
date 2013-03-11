@@ -18,7 +18,7 @@ namespace TP1_Telematique
         {
             if (_numeroTrame == -1) 
             {
-                    numeroTrame = ++idTrame;
+                    numeroTrame = idTrame++;
                     donnees = new byte[Constantes.TAILLE_DONNEE_TRAME];
             }
             else
