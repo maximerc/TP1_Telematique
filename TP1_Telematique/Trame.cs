@@ -9,7 +9,7 @@ namespace TP1_Telematique
     class Trame
     {
         public static int idTrame = 0;
-        public DateTime horlogeDeGarde = DateTime.MinValue;
+        public DateTime? horlogeDeGarde = null;
         public int numeroTrame;
         public byte[] donnees;
         public int total_de_controle;
@@ -46,7 +46,7 @@ namespace TP1_Telematique
 
         public bool EstExpire()
         {
-            return DateTime.Now.CompareTo(horlogeDeGarde) > 0;
+            return horlogeDeGarde != null && DateTime.Now.CompareTo(horlogeDeGarde) > 0;
         }
 
         public void InsererDonnees(byte[] _donnees)
