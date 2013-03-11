@@ -9,7 +9,7 @@ namespace TP1_Telematique
     class Trame
     {
         public static int idTrame = 0;
-        public DateTime horlogeDeGarde;
+        public DateTime horlogeDeGarde = DateTime.MinValue;
         public int numeroTrame;
         public byte[] donnees;
         public int total_de_controle;

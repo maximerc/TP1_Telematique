@@ -76,7 +76,7 @@ namespace TP1_Telematique
         public Trame donnerReponse()
         {
             _main.imprimer("Le réseau donne une réponse");
-            estPretEmettreReponse = false;
+            estRecuDestinationReponse = false;
             return trmReceptionDestinationReponse;
         }
     }

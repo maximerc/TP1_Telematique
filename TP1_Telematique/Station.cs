@@ -30,7 +30,7 @@ namespace TP1_Telematique
 
         public void emettre()
         {
-            int dernierACK = 0;
+            int dernierACK = -1;
             int prochaineTrameNumero = 0;
             Trame prochaineTrame;
             Trame trameManquante;
@@ -44,11 +44,12 @@ namespace TP1_Telematique
 
             while (true)
             {
-                trameManquante = tampon.TrouverTrame(dernierACK + 1);
+                trameManquante = tampon.TrouverTrameSelonNumero(dernierACK + 1);
                 if ( trameManquante != null && trameManquante.EstExpire()) /*timout*/
                 {
                     reseau.recevoir(trameManquante);
                     trameManquante.DemarrerHorlogeDeGarde();
+                    _main.imprimer("trame manquante; on renvoie: trame no. " + trameManquante.numeroTrame);
                 }
                 else if (reseau.estRecuDestinationReponse) //si le reseau est prêt
                 {
@@ -59,6 +60,7 @@ namespace TP1_Telematique
                         trameManquante = tampon.TrouverTrame(reponse.numeroTrame);
                         reseau.recevoir(trameManquante);
                         trameManquante.DemarrerHorlogeDeGarde();
+                        _main.imprimer("NAK NAK NAK NAK.");
                     }
                     else if (reponse.EstACK())
                     {
@@ -66,18 +68,22 @@ namespace TP1_Telematique
                        
                         if (reponse.numeroTrame == dernierACK + 1)
                         {
-                            dernierACK = reponse.numeroTrame;
+                            dernierACK++;
+
                             int positionDernierACK = tampon.TrouverTramePositionSelonNumero(dernierACK);
                             Trame trameDernierACK = tampon.TrouverTrame(positionDernierACK);
 
-                            while (trameDernierACK.EstACK())
+                            while (trameDernierACK != null && trameDernierACK.EstACK())
                             {
+                                _main.imprimer("consommer tant qu'il y à des ACK.");
+                                _main.imprimer("consommer " + trameDernierACK.numeroTrame);
                                 tampon.Consommer();
                                 dernierACK++;
                                 positionDernierACK = tampon.TrouverTramePositionSelonNumero(dernierACK);
                                 trameDernierACK = tampon.TrouverTrame(positionDernierACK);
                             }
-
+                            dernierACK--;
+                            
                         }
 
                         //reponse du réseau, on s'est fait owné en terro
@@ -89,26 +95,6 @@ namespace TP1_Telematique
                             */
                     }
 
-                }
-                else if (reseau.estPretEmettre && tampon.EstVide() == false) //si le reseau est prêt
-                {
-                    //envoi les trames entre dernierACK && dernierACK + fenetreDisponible
-                    //for ( int i=dernierACK+1; i < dernierACK + fenetreDisponible; i++)
-
-                    while (prochaineTrameNumero <= dernierACK + tailleFenetre)
-                    {
-                        prochaineTrame = tampon.TrouverTrame(prochaineTrameNumero);
-                        if (prochaineTrame != null)
-                        {
-                            reseau.recevoir(prochaineTrame);
-                            prochaineTrameNumero++;
-                        }
-                        else
-                            break;
-                    }
-
-                    //Trame trameAEnvoyer = tampon.
-                    //    reseau.recevoir(tampon.TrouverTrame();
                 }
                 else if (lectureFichierTermine == false && tampon.EstPlein() == false)
                 {
@@ -125,6 +111,28 @@ namespace TP1_Telematique
                         fs.Close();
                         _main.imprimer("La station émettrice à terminé la lecture du fichier.");
                     }
+                }
+                else if (reseau.estPretEmettre && tampon.EstVide() == false) //si le reseau est prêt
+                {
+                    //envoi les trames entre dernierACK && dernierACK + fenetreDisponible
+                    //for ( int i=dernierACK+1; i < dernierACK + fenetreDisponible; i++)
+
+                    //_main.imprimer("envoi les trames entre dernierACK && dernierACK + fenetreDisponible.");
+                    while (prochaineTrameNumero <= dernierACK + tailleFenetre)
+                    {
+                        prochaineTrame = tampon.TrouverTrameSelonNumero(prochaineTrameNumero);
+                        if (prochaineTrame != null)
+                        {
+                            _main.imprimer("envoi la trames prochaineTrameNumero" + prochaineTrameNumero);
+                            reseau.recevoir(prochaineTrame);
+                            prochaineTrameNumero++;
+                        }
+                        else
+                            break;
+                    }
+
+                    //Trame trameAEnvoyer = tampon.
+                    //    reseau.recevoir(tampon.TrouverTrame();
                 }
                 else if (tampon.EstVide() && lectureFichierTermine)
                 {
@@ -181,6 +189,9 @@ namespace TP1_Telematique
                                 Trame trameAck = new Trame(trame.numeroTrame, Constantes.TYPE_ACK);
                                 reseau.recevoirReponse(trameAck);
 
+                                _main.imprimer("envoyer ACK et ecriture de la trame " + trame.numeroTrame);
+
+
                                 for (int i = 0; i < Constantes.TAILLE_DONNEE_TRAME; i++)
                                 {
                                     if (trame.donnees[i] == 0)
@@ -211,6 +222,7 @@ namespace TP1_Telematique
                                 }
                             }
                         }
+
                     }
 
                     //reponse du réseau, on s'est fait owné en terro

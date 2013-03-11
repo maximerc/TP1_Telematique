@@ -14,7 +14,7 @@ namespace TP1_Telematique
 
         public TamponCirculaire(int l)
         {
-            tampon = new Trame[l+1];
+            tampon = new Trame[l];
             tete = 0;
             queue = 0;
             longueur = 0;
@@ -57,8 +57,8 @@ namespace TP1_Telematique
 
         public int TrouverTramePositionSelonNumero(int numeroTrame)
         {
-            for (int i = tete; i < queue; i++)
-                if (tampon[i].numeroTrame == numeroTrame)
+            for (int i = 0; i < Length(); i++)
+                if (tampon[i] != null && tampon[i].numeroTrame == numeroTrame)
                     return i;
             return -1;
         }
@@ -75,7 +75,8 @@ namespace TP1_Telematique
 
         public void Affecter(int numeroTrame, Trame trame)
         {
-            tampon[TrouverTramePositionSelonNumero(numeroTrame)] = trame;
+            int position = TrouverTramePositionSelonNumero(numeroTrame);
+            tampon[position] = trame;
         }
 
     }
